@@ -54,11 +54,11 @@ jobs:
           "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
 
       - name: Test
-        run: ./scripts/cargo.ps1 test
+        run: ./scripts/cargo.ps1 test --workspace
 
       - name: Lint
         # Quoted: PowerShell would otherwise take '--' for itself.
-        run: ./scripts/cargo.ps1 clippy --release --all-targets '--' -D warnings
+        run: ./scripts/cargo.ps1 clippy --workspace --release --all-targets '--' -D warnings
 
       - name: Build the program and the MSI
         run: ./installer/build.ps1

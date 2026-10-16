@@ -1,0 +1,120 @@
+<!doctype html>
+<!--
+  The Microsoft Store screenshots, 1920 × 1080, as ScreenShotCM's: the app on
+  a blue gradient. Rendered by msix/store-shots.js through headless Edge,
+  served from the project's root (PRY.FolderTintCM) so it can use the
+  website's assets: the real icons and the real picker photographs.
+    store-shots.html?shot=menu|picker|light|folders&lang=es|en
+  Explorer is drawn here, with the real icons, rather than photographed,
+  so no one's folders end up in the Store.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; }
+  body {
+    background: linear-gradient(135deg, #142152 0%, #23418f 55%, #2f62c4 100%);
+    font: 14px "Segoe UI Variable Text", "Segoe UI", sans-serif; color: #f0f0f0;
+    display: grid; place-items: center;
+  }
+  .shadow { box-shadow: 0 40px 120px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .06); }
+  /* ── Explorer, Windows 11 dark ─────────────────────────────────── */
+  .win { width: 1560px; height: 900px; border-radius: 10px; overflow: hidden; background: #191919; position: relative; }
+  .tabs { height: 44px; background: #202020; display: flex; align-items: end; padding: 0 10px; gap: 4px; }
+  .tab { height: 36px; padding: 0 16px; background: #2b2b2b; border-radius: 8px 8px 0 0; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .tab img { width: 16px; }
+  .ctl { margin-left: auto; display: flex; gap: 36px; padding: 0 18px 12px; color: #ccc; font-size: 13px; }
+  .bar { height: 46px; background: #2b2b2b; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-bottom: 1px solid #333; }
+  .nav { color: #aaa; font-size: 15px; letter-spacing: 6px; }
+  .addr { flex: 1; height: 32px; background: #202020; border-radius: 6px; display: flex; align-items: center; padding: 0 12px; gap: 8px; color: #ddd; }
+  .search { width: 280px; height: 32px; background: #202020; border-radius: 6px; padding: 0 12px; display: flex; align-items: center; color: #888; }
+  .cmds { height: 48px; display: flex; align-items: center; gap: 26px; padding: 0 18px; border-bottom: 1px solid #2c2c2c; color: #ddd; font-size: 13px; }
+  .body { display: grid; grid-template-columns: 240px 1fr; height: calc(100% - 138px); }
+  .side { background: #1c1c1c; padding: 12px 8px; display: grid; align-content: start; gap: 2px; }
+  .side div { padding: 7px 12px; border-radius: 5px; display: flex; gap: 10px; align-items: center; color: #ddd; }
+  .side div.on { background: #2d2d2d; }
+  .side img { width: 18px; }
+  .content { padding: 22px 28px; display: grid; grid-template-columns: repeat(auto-fill, 128px); grid-auto-rows: 132px; gap: 6px 10px; align-content: start; }
+  .item { display: grid; justify-items: center; align-content: start; gap: 4px; padding: 8px 4px; border-radius: 6px; text-align: center; font-size: 13px; }
+  .item img { width: 92px; }
+  .item.sel { background: rgba(96, 205, 255, .16); box-shadow: inset 0 0 0 1px rgba(96, 205, 255, .55); }
+  .big .content { grid-template-columns: repeat(auto-fill, 172px); grid-auto-rows: 176px; gap: 10px 18px; padding: 30px 40px; }
+  .big .item img { width: 136px; }
+  /* ── The modern context menu ───────────────────────────────────── */
+  .menu { position: absolute; background: #2c2c2c; border: 1px solid #3c3c3c; border-radius: 8px; padding: 6px; box-shadow: 0 16px 48px rgba(0, 0, 0, .55); font-size: 14px; }
+  .menu .row { display: flex; align-items: center; gap: 12px; height: 34px; padding: 0 12px; border-radius: 4px; white-space: nowrap; }
+  .menu .row img, .menu .row i { width: 16px; height: 16px; flex: none; }
+  .menu .row.on { background: #3a3a3a; }
+  .menu .row .chev { margin-left: auto; color: #bbb; font-style: normal; padding-left: 24px; }
+  .menu hr { border: 0; border-top: 1px solid #3c3c3c; margin: 5px 4px; }
+  .quick { display: flex; gap: 6px; padding: 4px 4px 6px; }
+  .quick span { width: 40px; height: 34px; border-radius: 4px; display: grid; place-items: center; color: #ddd; font-size: 16px; }
+  .main { left: 520px; top: 300px; width: 330px; }
+  .sub { left: 852px; top: 410px; width: 250px; }
+  .pick { width: 1080px; }
+</style>
+</head>
+<body>
+<script>
+  const q = new URLSearchParams(location.search);
+  const shot = q.get("shot") || "menu";
+  const es = (q.get("lang") || "es") === "es";
+  const t = (s, e) => (es ? s : e);
+  const A = "../../web/assets";
+  const F = (c) => `${A}/folders/${c}.png`;
+  const names = {
+    red: t("Rojo", "Red"), orange: t("Naranja", "Orange"), yellow: t("Amarillo", "Yellow"), green: t("Verde", "Green"),
+    mint: t("Menta", "Mint"), teal: t("Turquesa", "Teal"), cyan: t("Celeste", "Cyan"), blue: t("Azul", "Blue"),
+    indigo: t("Índigo", "Indigo"), purple: t("Morado", "Purple"), pink: t("Rosa", "Pink"), brown: t("Marrón", "Brown"), gray: t("Gris", "Gray"),
+  };
+  const folders = [
+    ["indigo", t("Proyectos", "Projects")], ["green", t("Facturas 2026", "Invoices 2026")], ["orange", t("Fotos de viaje", "Travel photos")],
+    ["pink", t("Diseño", "Design")], ["blue", t("Documentos", "Documents")], ["purple", t("Clientes", "Clients")],
+    ["red", t("Urgente", "Urgent")], ["mint", t("Recetas", "Recipes")], ["brown", t("Archivo 2025", "Archive 2025")],
+    ["teal", t("Música", "Music")], ["yellow", t("Ideas", "Ideas")], ["gray", t("Copias de seguridad", "Backups")],
+    ["cyan", t("Viajes", "Trips")], ["indigo", t("Universidad", "University")],
+  ];
+  function explorer(big, selected) {
+    const items = folders.map(([c, n], i) =>
+      `<div class="item ${i === selected ? "sel" : ""}"><img src="${F(c)}"><span>${n}</span></div>`).join("");
+    const side = [["blue", t("Inicio", "Home")], ["purple", t("Galería", "Gallery")], ["gray", t("Escritorio", "Desktop")],
+      ["gray", t("Descargas", "Downloads")], ["blue", t("Documentos", "Documents"), 1], ["orange", t("Imágenes", "Pictures")],
+      ["teal", t("Música", "Music")], ["red", t("Vídeos", "Videos")]]
+      .map(([c, n, on]) => `<div class="${on ? "on" : ""}"><img src="${F(c)}">${n}</div>`).join("");
+    return `<div class="win shadow ${big ? "big" : ""}">
+      <div class="tabs"><div class="tab"><img src="${F("blue")}">${t("Documentos", "Documents")}</div><div class="ctl"><span>—</span><span>☐</span><span>✕</span></div></div>
+      <div class="bar"><span class="nav">← → ↑ ⟳</span><div class="addr"><img src="${F("blue")}" width="16">›&nbsp; ${t("Documentos", "Documents")}</div><div class="search">${t("Buscar en Documentos", "Search Documents")}</div></div>
+      <div class="cmds"><span>＋ ${t("Nuevo", "New")}</span><span>✂</span><span>⧉</span><span>⇪</span><span>🗑</span><span>⇅ ${t("Ordenar", "Sort")}</span><span>☰ ${t("Ver", "View")}</span></div>
+      <div class="body"><div class="side">${side}</div><div class="content">${items}</div></div>
+    </div>`;
+  }
+  function menus() {
+    const subs = Object.keys(names).map((c) =>
+      `<div class="row ${c === "pink" ? "on" : ""}"><img src="${F(c)}">${names[c]}</div>`).join("");
+    return `<div class="menu main">
+        <div class="quick"><span>✂</span><span>⧉</span><span>✎</span><span>⇪</span><span>🗑</span></div>
+        <div class="row"><i></i>${t("Abrir", "Open")}</div>
+        <div class="row"><i></i>${t("Abrir en nueva pestaña", "Open in new tab")}</div>
+        <div class="row"><i></i>${t("Anclar a Acceso rápido", "Pin to Quick access")}</div>
+        <div class="row on"><img src="${A}/icon-44.png">FolderTintCM<i class="chev">›</i></div>
+        <div class="row"><i></i>${t("Comprimir en archivo ZIP", "Compress to ZIP file")}</div>
+        <div class="row"><i></i>${t("Copiar como ruta de acceso", "Copy as path")}</div>
+        <div class="row"><i></i>${t("Propiedades", "Properties")}</div>
+        <hr><div class="row"><i></i>${t("Mostrar más opciones", "Show more options")}</div>
+      </div>
+      <div class="menu sub">${subs}
+        <div class="row"><img src="${A}/icon-44.png">${t("Personalizado…", "Custom…")}</div>
+        <hr><div class="row"><i></i>${t("Quitar color", "Remove colour")}</div>
+      </div>`;
+  }
+  let html = "";
+  if (shot === "menu") html = `<div style="position:relative">${explorer(false, 3)}${menus()}</div>`;
+  if (shot === "folders") html = explorer(true, -1);
+  if (shot === "picker") html = `<img class="pick shadow" style="border-radius:10px" src="${A}/img/${es ? "es" : "en"}/picker-dark.png">`;
+  if (shot === "light") html = `<img class="pick shadow" style="border-radius:10px" src="${A}/img/${es ? "es" : "en"}/picker-light.png">`;
+  document.body.innerHTML = html;
+</script>
+</body>
+</html>

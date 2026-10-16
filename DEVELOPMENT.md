@@ -113,11 +113,38 @@ se sube a cada versión del repositorio del sitio
 (`foldertintcm/foldertintcm.github.io`), para el enlace permanente
 `releases/latest/download/FolderTintCM.msi`.
 
+## Microsoft Store (MSIX)
+
+```powershell
+pwsh -ExecutionPolicy Bypass ./msix/build.ps1            # dist/FolderTintCM-<versión>.msix
+pwsh -ExecutionPolicy Bypass ./msix/build.ps1 -Layout    # además, para probarlo instalado
+Add-AppxPackage -Register target/layout/<nombre completo>/AppxManifest.xml   # Modo de desarrollador
+```
+
+Identidad reservada en Partner Center: `CarlosM.FolderTintCM` (Store ID
+`9MZCRR9KR8TB`), con los valores por defecto de `msix/build.ps1`. Se sube sin
+firmar: la Store lo firma. Necesita `makeappx.exe`
+(Microsoft.Windows.SDK.BuildTools, como ScreenShotCM).
+
+- Un paquete no puede registrar el menú en el registro, así que declara una
+  extensión del Explorador: `shellext/` es una DLL COM en Rust
+  (`IExplorerCommand`) con el mismo submenú, que en Windows 11 sale en el
+  primer menú. Cada entrada ejecuta `foldertintcm.exe`, como el MSI.
+- El programa sabe que corre desde un paquete por el nombre de su carpeta
+  (`package.rs`), igual que la extensión, que no tiene identidad de paquete.
+  Guarda iconos y colores recientes en la carpeta de datos del paquete
+  (`%LOCALAPPDATA%\Packages\<familia>\LocalCache\FolderTintCM`): no cambia
+  con las actualizaciones y Windows la borra al desinstalar, y entonces las
+  carpetas vuelven solas al icono normal. No escribe en el registro.
+- La DLL corre dentro del Explorador: sin `unwrap` ni índices que puedan
+  fallar; cada error es un HRESULT.
+- Ficha: `msix/store-listing.md`. Capturas (1920 × 1080, es/en):
+  `node msix/store-shots.js <msedge.exe> <url de PRY.FolderTintCM> dist/store`
+  sirviendo la carpeta del proyecto por HTTP.
+
 ## Pendiente
 
-- Menú de primer nivel en Windows 11 (sin *Mostrar más opciones*): requiere
-  un `IExplorerCommand` en una DLL COM y un paquete con identidad (MSIX o
-  paquete disperso firmado).
-- Publicación: la organización `foldertintcm` en GitHub con sus dos
-  repositorios, la primera versión en Releases, firma de código y
-  Microsoft Store.
+- Menú de primer nivel en Windows 11 también para el MSI (hoy solo lo tiene
+  el paquete de la Store): requiere registrar la extensión con un paquete
+  disperso firmado.
+- Firma de código del MSI (SignPath u otro), para que SmartScreen no avise.

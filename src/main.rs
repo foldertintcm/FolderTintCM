@@ -188,16 +188,25 @@ fn report(result: Result<(), String>) -> ExitCode {
     }
 }
 
+/// Opened from Start: where FolderTintCM lives. The Store build's menu is in
+/// Windows 11's first menu; the MSI's, under "Show more options".
 fn about() {
-    message(
+    let text = if paths::package_family().is_some() {
+        tr(
+            "FolderTintCM está instalado.\n\nHaga clic derecho en una carpeta y elija «FolderTintCM» \
+             para darle uno de los 13 colores, uno propio con «Personalizado…», o quitarlo.",
+            "FolderTintCM is installed.\n\nRight-click a folder and choose \"FolderTintCM\" to give it \
+             one of the 13 colours, your own with \"Custom…\", or remove it.",
+        )
+    } else {
         tr(
             "FolderTintCM está instalado.\n\nHaga clic derecho en una carpeta y elija «FolderTintCM». \
              En Windows 11 está en «Mostrar más opciones» (Mayús+F10).",
             "FolderTintCM is installed.\n\nRight-click a folder and choose \"FolderTintCM\". \
              On Windows 11 it is under \"Show more options\" (Shift+F10).",
-        ),
-        MB_ICONINFORMATION,
-    );
+        )
+    };
+    message(text, MB_ICONINFORMATION);
 }
 
 fn fail(text: &str) -> ExitCode {
