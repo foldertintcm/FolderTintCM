@@ -26,6 +26,9 @@ pub enum Command {
     /// `--export-brand <dir>`: the icon and the folders as PNGs, for the
     /// website.
     ExportBrand { dir: PathBuf },
+    /// `--export-package-assets <dir>`: icons and logos for the Microsoft
+    /// Store package.
+    ExportPackageAssets { dir: PathBuf },
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -56,6 +59,9 @@ pub fn parse(args: impl IntoIterator<Item = OsString>) -> Result<Command, CliErr
             folder: non_empty(folder)?,
         }),
         (Some("--uninstall"), []) => Ok(Command::Uninstall),
+        (Some("--export-package-assets"), [dir]) => Ok(Command::ExportPackageAssets {
+            dir: non_empty(dir)?,
+        }),
         (Some("--export-brand"), [dir]) => Ok(Command::ExportBrand {
             dir: non_empty(dir)?,
         }),

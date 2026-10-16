@@ -19,12 +19,34 @@ pub fn icon_file(install_dir: &Path, tint: Tint) -> PathBuf {
         .join(format!("{}.ico", tint.slug()))
 }
 
-/// `%LOCALAPPDATA%\FolderTintCM`: what FolderTintCM keeps per user, apart
-/// from the program (the uninstaller removes it).
+/// The MSIX package the program runs from (the Microsoft Store build), as
+/// its family name; `None` for the MSI.
+pub fn package_family() -> Option<String> {
+    let exe = std::env::current_exe().ok()?;
+    crate::package::containing(&exe).map(|(_, family)| family)
+}
+
+/// What FolderTintCM keeps per user, apart from the program:
+/// `%LOCALAPPDATA%\FolderTintCM` for the MSI (its uninstaller removes it),
+/// the package's own data folder for the Store build (Windows removes it
+/// with the package, and the folders coloured from it go back to normal).
 pub fn data_dir() -> io::Result<PathBuf> {
-    std::env::var_os("LOCALAPPDATA")
-        .map(|base| PathBuf::from(base).join("FolderTintCM"))
-        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "LOCALAPPDATA is not set"))
+    let missing = || io::Error::new(io::ErrorKind::NotFound, "LOCALAPPDATA is not set");
+    match package_family() {
+        Some(family) => crate::package::local_cache(&family)
+            .map(|dir| dir.join("FolderTintCM"))
+            .ok_or_else(missing),
+        None => std::env::var_os("LOCALAPPDATA")
+            .map(|base| PathBuf::from(base).join("FolderTintCM"))
+            .ok_or_else(missing),
+    }
+}
+
+/// A palette colour's icon as a coloured folder names it. The MSI's own
+/// copy beside the program; for the Store build, a copy in the data folder,
+/// since the package's folder changes name with every update.
+pub fn tint_icon(data_dir: &Path, tint: Tint) -> PathBuf {
+    data_dir.join("icons").join(format!("{}.ico", tint.slug()))
 }
 
 /// The icon of a colour the user picked, drawn on first use.

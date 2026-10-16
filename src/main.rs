@@ -17,6 +17,7 @@ mod i18n;
 mod ico;
 mod installer;
 mod ledger;
+mod package;
 mod palette;
 mod paths;
 mod picker;
@@ -67,6 +68,7 @@ fn main() -> ExitCode {
         // Run by the build scripts: no dialog, the exit code says it all.
         Command::ExportInstallerAssets { dir } => exit_code(installer::export(&dir)),
         Command::ExportBrand { dir } => exit_code(installer::export_brand(&dir)),
+        Command::ExportPackageAssets { dir } => exit_code(installer::export_package_assets(&dir)),
     }
 }
 
@@ -79,13 +81,21 @@ fn exit_code(result: std::io::Result<()>) -> ExitCode {
 }
 
 fn apply(colour: Colour, folder: &Path) -> Result<(), String> {
-    let exe_dir = paths::install_dir().map_err(|e| e.to_string())?;
+    let data = paths::data_dir().map_err(|e| e.to_string())?;
+    let packaged = paths::package_family().is_some();
     let icon = match colour {
-        Colour::Tint(tint) => paths::icon_file(&exe_dir, tint),
-        Colour::Custom(rgb) => {
-            let data = paths::data_dir().map_err(|e| e.to_string())?;
-            custom::ensure_icon(&data, rgb).map_err(|e| e.to_string())?
+        // The Store build draws its palette icons into its data folder:
+        // the package's own folder is renamed by every update.
+        Colour::Tint(tint) if packaged => {
+            let icon = paths::tint_icon(&data, tint);
+            custom::ensure_icon_at(&icon, Rgb(tint.rgb())).map_err(|e| e.to_string())?;
+            icon
         }
+        Colour::Tint(tint) => {
+            let exe_dir = paths::install_dir().map_err(|e| e.to_string())?;
+            paths::icon_file(&exe_dir, tint)
+        }
+        Colour::Custom(rgb) => custom::ensure_icon(&data, rgb).map_err(|e| e.to_string())?,
     };
     // Pointing a folder at a missing icon would leave it blank.
     if !icon.is_file() {
@@ -100,11 +110,13 @@ fn apply(colour: Colour, folder: &Path) -> Result<(), String> {
     }
     folder::set_icon(folder, &paths::portable(&icon)).map_err(describe)?;
     // Only for tidying up on uninstall and for the menu: a failure here
-    // must not undo the colour the user just chose.
-    let _ = Ledger::user().record(folder, colour);
-    if let (Colour::Custom(rgb), Ok(exe), Ok(data)) =
-        (colour, std::env::current_exe(), paths::data_dir())
-    {
+    // must not undo the colour the user just chose. The Store build has no
+    // uninstall step to run (its icons go with the package, and the folders
+    // with them), so it keeps no list in the registry.
+    if !packaged {
+        let _ = Ledger::user().record(folder, colour);
+    }
+    if let (Colour::Custom(rgb), Ok(exe)) = (colour, std::env::current_exe()) {
         custom::remember(rgb, &exe, &data);
     }
     Ok(())
@@ -117,10 +129,11 @@ fn pick(folder: &Path) -> Result<(), String> {
         .map_err(describe)?
         .and_then(|icon| folder::colour_of(&icon))
         .map(|c| Rgb(c.rgb()));
+    let data = paths::data_dir().map_err(|e| e.to_string())?;
     let initial = current
-        .or_else(|| custom::recent().first().copied())
+        .or_else(|| custom::recent(&data).first().copied())
         .unwrap_or(Rgb(Tint::Blue.rgb()));
-    match custom::pick_shared(initial) {
+    match custom::pick_shared(initial, &data) {
         Some(rgb) => apply(Colour::from_rgb(rgb), folder),
         None => Ok(()),
     }

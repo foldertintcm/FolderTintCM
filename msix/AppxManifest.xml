@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The Microsoft Store package. msix/build.ps1 fills the {{…}} fields: the
+  identity and publisher come from Partner Center (Product identity), the
+  version from Cargo.toml.
+
+  A full-trust desktop app whose work happens from Explorer's menu: the
+  package declares FolderTintCM's IExplorerCommand (foldertintcm_menu.dll)
+  for folders and folder backgrounds. On Windows 11 it shows in the first
+  menu, without "Show more options". Each entry runs foldertintcm.exe.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
+  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop4 desktop5 com rescap">
+
+  <Identity Name="{{IdentityName}}"
+            Publisher="{{Publisher}}"
+            Version="{{Version}}"
+            ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>FolderTintCM</DisplayName>
+    <PublisherDisplayName>{{PublisherDisplayName}}</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Colores para las carpetas de Windows · Folder colours for Windows.</Description>
+  </Properties>
+
+  <!-- desktop5:ItemType needs Windows 10 1903 (build 18362). -->
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.18362.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <!-- The program and its menu speak Spanish and English, as Windows does;
+       the Store listing is written in both. -->
+  <Resources>
+    <Resource Language="es-ES" />
+    <Resource Language="en-US" />
+  </Resources>
+
+  <Applications>
+    <Application Id="FolderTintCM" Executable="foldertintcm.exe" EntryPoint="Windows.FullTrustApplication">
+      <!-- Opened from Start, it says where it lives: Explorer's menu. -->
+      <uap:VisualElements
+        DisplayName="FolderTintCM"
+        Description="Colores para tus carpetas · Colours for your folders"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+      </uap:VisualElements>
+      <Extensions>
+        <!-- The menu on a folder, and on the background of an open one. -->
+        <desktop4:Extension Category="windows.fileExplorerContextMenus">
+          <desktop4:FileExplorerContextMenus>
+            <desktop5:ItemType Type="Directory">
+              <desktop5:Verb Id="FolderTintCM" Clsid="73BECE91-1B44-47C5-A536-A0552E5387C6" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type="Directory\Background">
+              <desktop5:Verb Id="FolderTintCMBackground" Clsid="73BECE91-1B44-47C5-A536-A0552E5387C6" />
+            </desktop5:ItemType>
+          </desktop4:FileExplorerContextMenus>
+        </desktop4:Extension>
+        <!-- The class behind that verb: the menu extension, in-process. -->
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:SurrogateServer DisplayName="FolderTintCM">
+              <com:Class Id="73BECE91-1B44-47C5-A536-A0552E5387C6" Path="foldertintcm_menu.dll" ThreadingModel="STA" />
+            </com:SurrogateServer>
+          </com:ComServer>
+        </com:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

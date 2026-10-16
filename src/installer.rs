@@ -48,6 +48,63 @@ pub fn export_brand(dir: &Path) -> io::Result<()> {
     Ok(())
 }
 
+/// What the Microsoft Store package holds besides the program and its menu
+/// extension: `icons\<tint>.ico` for the menu's entries, and in `Assets\`
+/// the logos the manifest names, at the sizes Windows asks for (Start, the
+/// taskbar, the Store and Settings).
+pub fn export_package_assets(dir: &Path) -> io::Result<()> {
+    let icons = dir.join("icons");
+    std::fs::create_dir_all(&icons)?;
+    for tint in Tint::ALL {
+        let rgb = art::unit_rgb(tint.rgb());
+        let bytes = ico::ico(|size| art::folder(size, |_| rgb));
+        std::fs::write(icons.join(format!("{}.ico", tint.slug())), bytes)?;
+    }
+    let assets = dir.join("Assets");
+    std::fs::create_dir_all(&assets)?;
+    let logo = |name: String, width: u32, height: u32, mark: u32| {
+        std::fs::write(
+            assets.join(name),
+            ico::png(width, height, &centred(width, height, mark)),
+        )
+    };
+    logo("Square44x44Logo.png".into(), 44, 44, 44)?;
+    logo("Square150x150Logo.png".into(), 150, 150, 120)?;
+    logo("Wide310x150Logo.png".into(), 310, 150, 120)?;
+    logo("StoreLogo.png".into(), 50, 50, 50)?;
+    // Crisp taskbar and Start list icons, with and without the tile plate.
+    for size in [16u32, 24, 32, 48, 256] {
+        logo(
+            format!("Square44x44Logo.targetsize-{size}.png"),
+            size,
+            size,
+            size,
+        )?;
+        logo(
+            format!("Square44x44Logo.targetsize-{size}_altform-unplated.png"),
+            size,
+            size,
+            size,
+        )?;
+    }
+    Ok(())
+}
+
+/// The mark, `mark` pixels square, centred on a transparent `width` ×
+/// `height` canvas.
+fn centred(width: u32, height: u32, mark: u32) -> Vec<u8> {
+    let icon = art::spectrum(mark);
+    let mut out = vec![0u8; (width * height * 4) as usize];
+    let (ox, oy) = ((width - mark) / 2, (height - mark) / 2);
+    let row = (mark * 4) as usize;
+    for y in 0..mark {
+        let src = (y * mark * 4) as usize;
+        let dst = (((y + oy) * width + ox) * 4) as usize;
+        out[dst..dst + row].copy_from_slice(&icon[src..src + row]);
+    }
+    out
+}
+
 /// Where the verb lives, and how Explorer names the folder in its command.
 /// `custom.rs` adds the recent colours under the same keys.
 pub struct Place {

@@ -2,12 +2,15 @@
 //! picker, drawing its icon on first use, and keeping the last few in the
 //! context menu so they are one click away next time.
 //!
-//! Kept under `HKCU\Software\FolderTintCM\Custom`:
-//! - `Recent`: the last colours used, newest first (`3a7bd5,ff8800`).
-//! - (`Swatches`, the 16 slots of the Windows dialog 0.2.0 used, is no
-//!   longer written; `forget_all` still removes it with the key.)
-//! - `LastPick`: the latest answer of the dialog, for the other folders of a
-//!   multiple selection (see `pick_shared`).
+//! Kept as small files in the data folder (`paths::data_dir`), where the
+//! Store build's menu extension can read them too:
+//! - `recent.txt`: the last colours used, newest first (`3a7bd5,ff8800`).
+//! - `last-pick.txt`: the latest answer of the picker, for the other folders
+//!   of a multiple selection (see `pick_shared`).
+//!
+//! 0.3.0 kept the recent colours in `HKCU\Software\FolderTintCM\Custom`;
+//! they are still read from there until the file exists, and `forget_all`
+//! removes that key.
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -23,7 +26,11 @@ use crate::installer::PLACES;
 use crate::palette::Rgb;
 use crate::{art, ico, reg};
 
-const KEY: &str = r"Software\FolderTintCM\Custom";
+/// Where 0.3.0 kept the recent colours.
+const LEGACY_KEY: &str = r"Software\FolderTintCM\Custom";
+
+pub const RECENT_FILE: &str = "recent.txt";
+const LAST_PICK_FILE: &str = "last-pick.txt";
 
 /// How many recent colours the menu offers.
 pub const MAX_RECENT: usize = 6;
@@ -31,11 +38,10 @@ pub const MAX_RECENT: usize = 6;
 /// Shown with a line above it.
 const ECF_SEPARATORBEFORE: u32 = 0x20;
 
-/// The `.ico` of a custom colour, drawn the first time it is used.
-pub fn ensure_icon(data_dir: &Path, rgb: Rgb) -> io::Result<PathBuf> {
-    let path = crate::paths::custom_icon(data_dir, rgb);
+/// Draws the `.ico` of `rgb` at `path`, unless it is already there.
+pub fn ensure_icon_at(path: &Path, rgb: Rgb) -> io::Result<()> {
     if path.is_file() {
-        return Ok(path);
+        return Ok(());
     }
     if let Some(dir) = path.parent() {
         std::fs::create_dir_all(dir)?;
@@ -46,23 +52,43 @@ pub fn ensure_icon(data_dir: &Path, rgb: Rgb) -> io::Result<PathBuf> {
     let bytes = ico::ico(|size| art::folder(size, |_| colour));
     let tmp = path.with_extension(format!("{}.tmp", std::process::id()));
     std::fs::write(&tmp, bytes)?;
-    std::fs::rename(&tmp, &path)?;
+    std::fs::rename(&tmp, path)
+}
+
+/// The `.ico` of a custom colour, drawn the first time it is used.
+pub fn ensure_icon(data_dir: &Path, rgb: Rgb) -> io::Result<PathBuf> {
+    let path = crate::paths::custom_icon(data_dir, rgb);
+    ensure_icon_at(&path, rgb)?;
     Ok(path)
+}
+
+/// Writes `text` to `path` through a temporary file, so a reader never
+/// sees half of it.
+fn write_atomic(path: &Path, text: &str) -> io::Result<()> {
+    if let Some(dir) = path.parent() {
+        std::fs::create_dir_all(dir)?;
+    }
+    let tmp = path.with_extension(format!("{}.tmp", std::process::id()));
+    std::fs::write(&tmp, text)?;
+    std::fs::rename(&tmp, path)
 }
 
 /// The recent colours, newest first. A debug build takes
 /// `FT_RECENT=3a7bd5,ff8800` instead, to photograph the picker without
 /// touching the user's list.
-pub fn recent() -> Vec<Rgb> {
+pub fn recent(data_dir: &Path) -> Vec<Rgb> {
     if cfg!(debug_assertions)
         && let Ok(forced) = std::env::var("FT_RECENT")
     {
         return parse_recent(&forced);
     }
-    parse_recent(&reg::get_string(KEY, Some("Recent")).unwrap_or_default())
+    match std::fs::read_to_string(data_dir.join(RECENT_FILE)) {
+        Ok(text) => parse_recent(&text),
+        Err(_) => parse_recent(&reg::get_string(LEGACY_KEY, Some("Recent")).unwrap_or_default()),
+    }
 }
 
-fn parse_recent(s: &str) -> Vec<Rgb> {
+pub fn parse_recent(s: &str) -> Vec<Rgb> {
     let mut out: Vec<Rgb> = Vec::new();
     for rgb in s
         .split(',')
@@ -84,13 +110,16 @@ fn promote(list: &[Rgb], rgb: Rgb) -> Vec<Rgb> {
         .collect()
 }
 
-/// Puts `rgb` first among the recent colours and rewrites their menu
-/// entries. `exe` is the program the entries run.
+/// Puts `rgb` first among the recent colours and, for the MSI, rewrites
+/// their menu entries (the Store build's extension reads the file itself).
+/// `exe` is the program the entries run.
 pub fn remember(rgb: Rgb, exe: &Path, data_dir: &Path) {
-    let list = promote(&recent(), rgb);
+    let list = promote(&recent(data_dir), rgb);
     let joined: Vec<String> = list.iter().map(|c| c.hex()).collect();
-    let _ = reg::set_string(KEY, Some("Recent"), &joined.join(","));
-    sync_menu(&list, exe, data_dir);
+    let _ = write_atomic(&data_dir.join(RECENT_FILE), &joined.join(","));
+    if crate::paths::package_family().is_none() {
+        sync_menu(&list, exe, data_dir);
+    }
 }
 
 /// The menu key of the `i`-th recent colour under a place. Explorer sorts
@@ -126,14 +155,15 @@ fn sync_menu(list: &[Rgb], exe: &Path, data_dir: &Path) {
     }
 }
 
-/// Uninstalling: the recent colours' menu entries and everything kept here.
+/// Uninstalling the MSI: the recent colours' menu entries and the 0.3.0
+/// registry key. The data folder, with the files, goes as a whole.
 pub fn forget_all() {
     for place in &PLACES {
         for i in 0..MAX_RECENT {
             reg::delete_tree(&recent_key(place.key, i));
         }
     }
-    reg::delete_tree(KEY);
+    reg::delete_tree(LEGACY_KEY);
 }
 
 fn now_ms() -> u128 {
@@ -143,12 +173,12 @@ fn now_ms() -> u128 {
         .unwrap_or(0)
 }
 
-/// The colour dialog, once for a whole selection. Explorer runs the verb
+/// The colour picker, once for a whole selection. Explorer runs the verb
 /// once per selected folder, all at the same moment: the first process to
-/// get the lock shows the dialog and writes the answer down; the others,
+/// get the lock shows the picker and writes the answer down; the others,
 /// started before that answer, wait for the lock and take it, colour or
-/// cancel, instead of opening a dialog each.
-pub fn pick_shared(initial: Rgb) -> Option<Rgb> {
+/// cancel, instead of opening a picker each.
+pub fn pick_shared(initial: Rgb, data_dir: &Path) -> Option<Rgb> {
     let started = now_ms();
     let mutex = unsafe { CreateMutexW(None, false, w!("Local\\FolderTintCM.Pick")) }.ok();
     if let Some(m) = mutex {
@@ -156,16 +186,20 @@ pub fn pick_shared(initial: Rgb) -> Option<Rgb> {
             WaitForSingleObject(m, INFINITE);
         }
     }
-    let answer = match last_pick() {
+    let last = data_dir.join(LAST_PICK_FILE);
+    let previous = std::fs::read_to_string(&last)
+        .ok()
+        .and_then(|s| parse_last_pick(&s));
+    let answer = match previous {
         Some((at, answer)) if at >= started => answer,
         _ => {
-            let answer = crate::picker::pick(initial, recent());
+            let answer = crate::picker::pick(initial, recent(data_dir));
             let value = format!(
                 "{}|{}",
                 now_ms(),
                 answer.map_or("cancel".to_owned(), Rgb::hex)
             );
-            let _ = reg::set_string(KEY, Some("LastPick"), &value);
+            let _ = write_atomic(&last, &value);
             answer
         }
     };
@@ -178,13 +212,8 @@ pub fn pick_shared(initial: Rgb) -> Option<Rgb> {
     answer
 }
 
-/// (when, colour or cancel) of the latest dialog.
-fn last_pick() -> Option<(u128, Option<Rgb>)> {
-    parse_last_pick(&reg::get_string(KEY, Some("LastPick"))?)
-}
-
 fn parse_last_pick(s: &str) -> Option<(u128, Option<Rgb>)> {
-    let (at, what) = s.split_once('|')?;
+    let (at, what) = s.trim().split_once('|')?;
     let at = at.parse().ok()?;
     match what {
         "cancel" => Some((at, None)),

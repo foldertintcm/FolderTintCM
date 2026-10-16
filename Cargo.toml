@@ -17,6 +17,7 @@ features = [
     "Win32_Globalization",
     "Win32_Storage_FileSystem",
     "Win32_Security",
+    "Win32_Storage_Packaging_Appx",
     "Win32_System_Registry",
     "Win32_System_Threading",
     "Win32_Graphics_Dwm",
@@ -30,6 +31,10 @@ features = [
     "Win32_Graphics_Imaging",
     "Win32_System_Com",
 ]
+
+# The program and, for the Microsoft Store package, its Explorer menu.
+[workspace]
+members = ["shellext"]
 
 [profile.release]
 opt-level = 3
