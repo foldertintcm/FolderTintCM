@@ -6,7 +6,10 @@ sin publicidad y sin conexión a internet.
 
 ![El selector de color de FolderTintCM](https://foldertintcm.github.io/assets/img/es/picker-dark.png)
 
-**[Instalador MSI](https://github.com/foldertintcm/foldertintcm.github.io/releases/latest/download/FolderTintCM.msi)** ·
+<a href="https://apps.microsoft.com/detail/9MZCRR9KR8TB?mode=direct"><img src="https://get.microsoft.com/images/es%20dark.svg" alt="Obtener en Microsoft Store" width="200"></a>
+
+**[Microsoft Store](https://apps.microsoft.com/detail/9MZCRR9KR8TB)** ·
+[Instalador MSI](https://github.com/foldertintcm/foldertintcm.github.io/releases/latest/download/FolderTintCM.msi) ·
 [Sitio web](https://foldertintcm.github.io/) ·
 [Privacidad](https://foldertintcm.github.io/privacy.html) ·
 [Soporte](https://github.com/foldertintcm/foldertintcm.github.io/issues) ·
@@ -14,14 +17,19 @@ sin publicidad y sin conexión a internet.
 
 ## Instalar
 
-Descarga el instalador MSI y ábrelo. Se instala para tu usuario, sin pedir
-administrador. El MSI no va firmado: Windows SmartScreen puede avisar al
-abrirlo (*Más información → Ejecutar de todas formas*). Cada versión, en
-[Releases](https://github.com/foldertintcm/foldertintcm.github.io/releases),
-publica su SHA-256 para comprobar que el archivo es el original.
+**Desde la [Microsoft Store](https://apps.microsoft.com/detail/9MZCRR9KR8TB)** (recomendado): un clic,
+firmado por Microsoft y con actualizaciones automáticas. En Windows 11 su menú
+está en el primer menú del clic derecho.
 
-Se desinstala desde *Configuración → Aplicaciones*: cada carpeta que
-coloreaste vuelve a su icono normal.
+**O con el instalador MSI**: descárgalo y ábrelo. Se instala para tu usuario,
+sin pedir administrador. El MSI no va firmado: Windows SmartScreen puede avisar
+al abrirlo (*Más información → Ejecutar de todas formas*). Cada versión, en
+[Releases](https://github.com/foldertintcm/foldertintcm.github.io/releases),
+publica su SHA-256 para comprobar que el archivo es el original. En Windows 11
+su menú está en *Mostrar más opciones*.
+
+De las dos formas se desinstala desde *Configuración → Aplicaciones*, y cada
+carpeta que coloreaste vuelve a su icono normal.
 
 ## Qué hace
 
@@ -64,18 +72,28 @@ terceros en [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md); seguridad en
 → **FolderTintCM** → pick a colour. Free, no account, no ads and no internet
 connection.
 
-**[MSI installer](https://github.com/foldertintcm/foldertintcm.github.io/releases/latest/download/FolderTintCM.msi)** ·
+<a href="https://apps.microsoft.com/detail/9MZCRR9KR8TB?mode=direct"><img src="https://get.microsoft.com/images/en-us%20dark.svg" alt="Get it from Microsoft" width="200"></a>
+
+**[Microsoft Store](https://apps.microsoft.com/detail/9MZCRR9KR8TB)** ·
+[MSI installer](https://github.com/foldertintcm/foldertintcm.github.io/releases/latest/download/FolderTintCM.msi) ·
 [Website](https://foldertintcm.github.io/) ·
 [Privacy](https://foldertintcm.github.io/privacy.html) ·
 [Support](https://github.com/foldertintcm/foldertintcm.github.io/issues)
 
 ### Install
 
-Download the MSI installer and open it. It installs for your user, without
-administrator rights. The MSI is not signed: Windows SmartScreen may warn when
-you open it (*More info → Run anyway*). Each release publishes its SHA-256 to
-check the file is the original. Uninstall from *Settings → Apps*: every folder
-you coloured gets its usual icon back.
+**From the [Microsoft Store](https://apps.microsoft.com/detail/9MZCRR9KR8TB)** (recommended): one click, signed
+by Microsoft and updated automatically. On Windows 11 its menu is in the first
+right-click menu.
+
+**Or with the MSI installer**: download it and open it. It installs for your
+user, without administrator rights. The MSI is not signed: Windows SmartScreen
+may warn when you open it (*More info → Run anyway*). Each release publishes
+its SHA-256 to check the file is the original. On Windows 11 its menu is under
+*Show more options*.
+
+Either way, uninstall from *Settings → Apps*: every folder you coloured gets
+its usual icon back.
 
 ### What it does
 
