@@ -98,19 +98,19 @@ pub fn icon(folder: &Path) -> Result<Option<String>, Error> {
     Ok((!icon.trim().is_empty()).then_some(icon))
 }
 
-/// Whether `icon` is one of FolderTint's, spelled with an environment
+/// Whether `icon` is one of FolderTintCM's, spelled with an environment
 /// variable or not.
 pub fn is_ours(icon: &str) -> bool {
     colour_of(icon).is_some()
 }
 
-/// The colour a FolderTint icon draws: `…\FolderTint\icons\<tint>.ico` for
-/// the palette, `…\FolderTint\custom\<rrggbb>.ico` for a picked colour;
+/// The colour a FolderTintCM icon draws: `…\FolderTintCM\icons\<tint>.ico` for
+/// the palette, `…\FolderTintCM\custom\<rrggbb>.ico` for a picked colour;
 /// `None` for any other icon.
 pub fn colour_of(icon: &str) -> Option<Colour> {
     let lower = icon.to_ascii_lowercase().replace('/', "\\");
     let mut parts = lower.rsplit('\\');
-    let (Some(file), Some(dir), Some("foldertint")) = (parts.next(), parts.next(), parts.next())
+    let (Some(file), Some(dir), Some("foldertintcm")) = (parts.next(), parts.next(), parts.next())
     else {
         return None;
     };
@@ -126,11 +126,11 @@ pub fn colour_of(icon: &str) -> Option<Colour> {
 #[derive(Debug, PartialEq, Eq)]
 pub enum Cleared {
     Restored,
-    /// No icon, or one FolderTint did not set: left as it was.
+    /// No icon, or one FolderTintCM did not set: left as it was.
     NotOurs,
 }
 
-/// Gives the folder back its normal icon, if FolderTint coloured it. Never
+/// Gives the folder back its normal icon, if FolderTintCM coloured it. Never
 /// undoes a customisation someone else made (a system folder's icon, one
 /// chosen in Properties).
 pub fn clear(folder: &Path) -> Result<Cleared, Error> {
@@ -242,13 +242,15 @@ mod tests {
 
     #[test]
     fn recognises_only_our_icons() {
-        assert!(is_ours(r"%LOCALAPPDATA%\Programs\FolderTint\icons\red.ico"));
         assert!(is_ours(
-            r"C:\Users\x\AppData\Local\Programs\FolderTint\icons\GRAY.ICO"
+            r"%LOCALAPPDATA%\Programs\FolderTintCM\icons\red.ico"
+        ));
+        assert!(is_ours(
+            r"C:\Users\x\AppData\Local\Programs\FolderTintCM\icons\GRAY.ICO"
         ));
         assert!(!is_ours(r"%SystemRoot%\system32\imageres.dll"));
         assert!(!is_ours(r"C:\Other\icons\red.ico"));
-        assert!(!is_ours(r"C:\FolderTint\icons\chartreuse.ico"));
+        assert!(!is_ours(r"C:\FolderTintCM\icons\chartreuse.ico"));
         assert!(!is_ours("red.ico"));
         assert!(!is_ours(""));
     }
@@ -256,15 +258,15 @@ mod tests {
     #[test]
     fn reads_the_colour_back_from_the_icon() {
         assert_eq!(
-            colour_of(r"C:\U\AppData\Local\FolderTint\custom\3A7BD5.ico"),
+            colour_of(r"C:\U\AppData\Local\FolderTintCM\custom\3A7BD5.ico"),
             Some(Colour::Custom(Rgb([0x3A, 0x7B, 0xD5])))
         );
         assert_eq!(
-            colour_of(r"%LOCALAPPDATA%\Programs\FolderTint\icons\teal.ico"),
+            colour_of(r"%LOCALAPPDATA%\Programs\FolderTintCM\icons\teal.ico"),
             Some(Colour::Tint(Tint::Teal))
         );
-        assert_eq!(colour_of(r"C:\FolderTint\custom\red.ico"), None);
-        assert_eq!(colour_of(r"C:\FolderTint\custom\3a7bd5.png"), None);
+        assert_eq!(colour_of(r"C:\FolderTintCM\custom\red.ico"), None);
+        assert_eq!(colour_of(r"C:\FolderTintCM\custom\3a7bd5.png"), None);
         assert_eq!(colour_of(r"C:\Other\custom\3a7bd5.ico"), None);
     }
 
@@ -327,7 +329,7 @@ mod tests {
 
     pub(crate) fn scratch(name: &str) -> Scratch {
         let dir =
-            std::env::temp_dir().join(format!("foldertint-test-{name}-{}", std::process::id()));
+            std::env::temp_dir().join(format!("foldertintcm-test-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         Scratch(dir)
@@ -338,14 +340,14 @@ mod tests {
     #[test]
     fn set_then_clear_round_trip() {
         let dir = scratch("roundtrip");
-        let icon = r"%LOCALAPPDATA%\Programs\FolderTint\icons\blue.ico";
+        let icon = r"%LOCALAPPDATA%\Programs\FolderTintCM\icons\blue.ico";
         assert_eq!(icon_of(&dir), None);
 
         set_icon(&dir, icon).unwrap();
         let ini = std::fs::read(dir.join("desktop.ini")).expect("desktop.ini written");
         let text = decode_ini(&ini);
         // Written as given, so the folder works for any user who has
-        // FolderTint; read back expanded.
+        // FolderTintCM; read back expanded.
         assert!(text.contains(icon), "{text}");
         assert!(icon_of(&dir).is_some_and(|i| is_ours(&i) && i.ends_with(r"\icons\blue.ico")));
         let attrs = std::fs::metadata(&dir).unwrap().file_attributes();
@@ -384,7 +386,7 @@ mod tests {
             "[.ShellClassInfo]\r\nInfoTip=keep me\r\n",
         )
         .unwrap();
-        set_icon(&dir, r"C:\x\FolderTint\icons\red.ico").unwrap();
+        set_icon(&dir, r"C:\x\FolderTintCM\icons\red.ico").unwrap();
         clear(&dir).unwrap();
         let text = decode_ini(&std::fs::read(dir.join("desktop.ini")).unwrap());
         assert!(text.contains("InfoTip=keep me"), "{text}");

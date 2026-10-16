@@ -61,7 +61,7 @@ fn string_tables() -> String {
             let _ = writeln!(rc, "  {id} {}", rc_string(text));
         };
         // The product's own name, in every language.
-        entry(strings::MENU, "FolderTint");
+        entry(strings::MENU, "FolderTintCM");
         for tint in Tint::ALL {
             entry(strings::tint(tint), pick(tint.names()));
         }
@@ -83,7 +83,7 @@ fn main() {
         parts.get(2).copied().unwrap_or(0),
     );
 
-    let icon = out.join("foldertint.ico");
+    let icon = out.join("foldertintcm.ico");
     fs::write(&icon, ico::ico(art::spectrum)).unwrap();
 
     let path = |p: PathBuf| p.display().to_string().replace('\\', "/");
@@ -103,13 +103,13 @@ BEGIN
   BEGIN
     BLOCK "040904b0"
     BEGIN
-      VALUE "CompanyName", "FolderTint"
-      VALUE "FileDescription", "FolderTint - folder colours"
+      VALUE "CompanyName", "FolderTintCM"
+      VALUE "FileDescription", "FolderTintCM - folder colours"
       VALUE "LegalCopyright", "Copyright (C) 2026 cmonroyp. GPL-3.0-or-later."
       VALUE "FileVersion", "{version}"
-      VALUE "InternalName", "foldertint"
-      VALUE "OriginalFilename", "foldertint.exe"
-      VALUE "ProductName", "FolderTint"
+      VALUE "InternalName", "foldertintcm"
+      VALUE "OriginalFilename", "foldertintcm.exe"
+      VALUE "ProductName", "FolderTintCM"
       VALUE "ProductVersion", "{version}"
     END
   END
@@ -124,9 +124,9 @@ END
         manifest = path(manifest_dir.join("assets").join("app.manifest")),
         tables = string_tables(),
     );
-    let rc_path = out.join("foldertint.rc");
+    let rc_path = out.join("foldertintcm.rc");
     fs::write(&rc_path, rc).unwrap();
-    let obj = out.join("foldertint-res.o");
+    let obj = out.join("foldertintcm-res.o");
     let status = Command::new("x86_64-w64-mingw32-windres")
         .arg(&rc_path)
         .arg("-O")

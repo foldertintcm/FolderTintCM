@@ -1,4 +1,4 @@
-//! The few registry operations FolderTint needs, all under
+//! The few registry operations FolderTintCM needs, all under
 //! `HKEY_CURRENT_USER` (it never asks for elevation), with paths as `&str`.
 
 use windows::Win32::Foundation::{ERROR_SUCCESS, WIN32_ERROR};
@@ -180,7 +180,7 @@ mod tests {
 
     #[test]
     fn values_round_trip_and_trees_go() {
-        let key = format!(r"Software\FolderTint-Test-{}-reg", std::process::id());
+        let key = format!(r"Software\FolderTintCM-Test-{}-reg", std::process::id());
         let sub = format!(r"{key}\a\b");
         set_string(&sub, None, "Índigo «x»").unwrap();
         set_string(&sub, Some("n"), "").unwrap();

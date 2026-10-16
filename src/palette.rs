@@ -180,7 +180,7 @@ impl Colour {
 }
 
 /// String-resource ids in the executable, read by the context menu through
-/// `MUIVerb=@foldertint.exe,-<id>` so it follows Windows' display language.
+/// `MUIVerb=@foldertintcm.exe,-<id>` so it follows Windows' display language.
 pub mod strings {
     use super::Tint;
 

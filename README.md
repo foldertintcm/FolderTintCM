@@ -1,15 +1,15 @@
-# FolderTint
+# FolderTintCM
 
 **Colores para las carpetas de Windows 10 y 11, como en el Mac.** Clic
-derecho en una carpeta → **FolderTint** → elige un color. Gratis, sin cuenta,
+derecho en una carpeta → **FolderTintCM** → elige un color. Gratis, sin cuenta,
 sin publicidad y sin conexión a internet.
 
-![El selector de color de FolderTint](https://foldertint.github.io/assets/img/es/picker-dark.png)
+![El selector de color de FolderTintCM](https://foldertintcm.github.io/assets/img/es/picker-dark.png)
 
-**[Instalador MSI](https://github.com/foldertint/foldertint.github.io/releases/latest/download/FolderTint.msi)** ·
-[Sitio web](https://foldertint.github.io/) ·
-[Privacidad](https://foldertint.github.io/privacy.html) ·
-[Soporte](https://github.com/foldertint/foldertint.github.io/issues) ·
+**[Instalador MSI](https://github.com/foldertintcm/foldertintcm.github.io/releases/latest/download/FolderTintCM.msi)** ·
+[Sitio web](https://foldertintcm.github.io/) ·
+[Privacidad](https://foldertintcm.github.io/privacy.html) ·
+[Soporte](https://github.com/foldertintcm/foldertintcm.github.io/issues) ·
 [English](#english)
 
 ## Instalar
@@ -17,7 +17,7 @@ sin publicidad y sin conexión a internet.
 Descarga el instalador MSI y ábrelo. Se instala para tu usuario, sin pedir
 administrador. El MSI no va firmado: Windows SmartScreen puede avisar al
 abrirlo (*Más información → Ejecutar de todas formas*). Cada versión, en
-[Releases](https://github.com/foldertint/foldertint.github.io/releases),
+[Releases](https://github.com/foldertintcm/foldertintcm.github.io/releases),
 publica su SHA-256 para comprobar que el archivo es el original.
 
 Se desinstala desde *Configuración → Aplicaciones*: cada carpeta que
@@ -32,7 +32,7 @@ coloreaste vuelve a su icono normal.
   tus colores recientes a un clic. Claro u oscuro, como Windows.
 - **Tus 6 últimos colores** aparecen también en el menú.
 - **Quitar color** deja la carpeta como estaba, y nunca toca un icono que no
-  puso FolderTint.
+  puso FolderTintCM.
 - Sobre una carpeta, en el fondo de una carpeta abierta o con varias
   carpetas seleccionadas (un solo selector para todas).
 - En **Windows 11** el menú está en *Mostrar más opciones* (`Mayús+F10`).
@@ -61,13 +61,13 @@ terceros en [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md); seguridad en
 ## English
 
 **Colours for Windows 10 and 11 folders, as on a Mac.** Right-click a folder
-→ **FolderTint** → pick a colour. Free, no account, no ads and no internet
+→ **FolderTintCM** → pick a colour. Free, no account, no ads and no internet
 connection.
 
-**[MSI installer](https://github.com/foldertint/foldertint.github.io/releases/latest/download/FolderTint.msi)** ·
-[Website](https://foldertint.github.io/) ·
-[Privacy](https://foldertint.github.io/privacy.html) ·
-[Support](https://github.com/foldertint/foldertint.github.io/issues)
+**[MSI installer](https://github.com/foldertintcm/foldertintcm.github.io/releases/latest/download/FolderTintCM.msi)** ·
+[Website](https://foldertintcm.github.io/) ·
+[Privacy](https://foldertintcm.github.io/privacy.html) ·
+[Support](https://github.com/foldertintcm/foldertintcm.github.io/issues)
 
 ### Install
 
@@ -85,7 +85,7 @@ you coloured gets its usual icon back.
   one click away. Light or dark, like Windows.
 - **Your last 6 colours** show up in the menu too.
 - **Remove colour** puts the folder back as it was, and never touches an icon
-  FolderTint did not set.
+  FolderTintCM did not set.
 - On a folder, on the background of an open folder, or on several selected
   folders at once (one picker for all of them).
 - On **Windows 11** the menu is under *Show more options* (`Shift+F10`).

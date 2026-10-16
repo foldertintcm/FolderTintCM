@@ -1,11 +1,11 @@
-//! FolderTint: colours folders from Explorer's context menu.
+//! FolderTintCM: colours folders from Explorer's context menu.
 //!
 //! There is no resident process. Each menu entry runs this executable once
 //! (`--apply <colour> <folder>`, `--pick <folder>` or `--clear <folder>`),
 //! which sets the folder's icon through the shell and exits; the installer
 //! registers the menu and ships one `.ico` per palette colour beside the
 //! executable. Colours picked in the dialog get their icon drawn on first
-//! use, under `%LOCALAPPDATA%\FolderTint\custom`.
+//! use, under `%LOCALAPPDATA%\FolderTintCM\custom`.
 
 #![windows_subsystem = "windows"]
 
@@ -47,8 +47,8 @@ fn main() -> ExitCode {
         }
         Err(cli::CliError::Usage) => {
             return fail(tr(
-                "Uso: foldertint --apply <color|#rrggbb> <carpeta> | --pick <carpeta> | --clear <carpeta>",
-                "Usage: foldertint --apply <colour|#rrggbb> <folder> | --pick <folder> | --clear <folder>",
+                "Uso: foldertintcm --apply <color|#rrggbb> <carpeta> | --pick <carpeta> | --clear <carpeta>",
+                "Usage: foldertintcm --apply <colour|#rrggbb> <folder> | --pick <folder> | --clear <folder>",
             ));
         }
     };
@@ -92,8 +92,8 @@ fn apply(colour: Colour, folder: &Path) -> Result<(), String> {
         return Err(format!(
             "{}\n{}",
             tr(
-                "Falta el icono; reinstale FolderTint.",
-                "The icon is missing; reinstall FolderTint."
+                "Falta el icono; reinstale FolderTintCM.",
+                "The icon is missing; reinstall FolderTintCM."
             ),
             icon.display()
         ));
@@ -132,8 +132,8 @@ fn clear(folder: &Path) -> Result<(), String> {
     Ok(())
 }
 
-/// Every folder FolderTint coloured gets its normal icon back, then
-/// everything FolderTint kept goes: the recent colours in the menu, their
+/// Every folder FolderTintCM coloured gets its normal icon back, then
+/// everything FolderTintCM kept goes: the recent colours in the menu, their
 /// icons and its registry key. Best effort: a folder since deleted, moved
 /// or on a drive not plugged in is skipped.
 fn uninstall() {
@@ -178,9 +178,9 @@ fn report(result: Result<(), String>) -> ExitCode {
 fn about() {
     message(
         tr(
-            "FolderTint está instalado.\n\nHaga clic derecho en una carpeta y elija «FolderTint». \
+            "FolderTintCM está instalado.\n\nHaga clic derecho en una carpeta y elija «FolderTintCM». \
              En Windows 11 está en «Mostrar más opciones» (Mayús+F10).",
-            "FolderTint is installed.\n\nRight-click a folder and choose \"FolderTint\". \
+            "FolderTintCM is installed.\n\nRight-click a folder and choose \"FolderTintCM\". \
              On Windows 11 it is under \"Show more options\" (Shift+F10).",
         ),
         MB_ICONINFORMATION,
@@ -193,7 +193,7 @@ fn fail(text: &str) -> ExitCode {
 }
 
 fn message(text: &str, icon: MESSAGEBOX_STYLE) {
-    let (Some(text), Some(title)) = (wide::wide(text), wide::wide("FolderTint")) else {
+    let (Some(text), Some(title)) = (wide::wide(text), wide::wide("FolderTintCM")) else {
         return;
     };
     unsafe {

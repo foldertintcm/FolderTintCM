@@ -19,11 +19,11 @@ pub fn icon_file(install_dir: &Path, tint: Tint) -> PathBuf {
         .join(format!("{}.ico", tint.slug()))
 }
 
-/// `%LOCALAPPDATA%\FolderTint`: what FolderTint keeps per user, apart
+/// `%LOCALAPPDATA%\FolderTintCM`: what FolderTintCM keeps per user, apart
 /// from the program (the uninstaller removes it).
 pub fn data_dir() -> io::Result<PathBuf> {
     std::env::var_os("LOCALAPPDATA")
-        .map(|base| PathBuf::from(base).join("FolderTint"))
+        .map(|base| PathBuf::from(base).join("FolderTintCM"))
         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "LOCALAPPDATA is not set"))
 }
 
@@ -33,9 +33,9 @@ pub fn custom_icon(data_dir: &Path, rgb: Rgb) -> PathBuf {
 }
 
 /// The icon's path as `desktop.ini` should hold it: under
-/// `%LOCALAPPDATA%` when FolderTint is installed there (the per-user MSI
+/// `%LOCALAPPDATA%` when FolderTintCM is installed there (the per-user MSI
 /// puts it there), so a coloured folder on a shared or removable drive
-/// shows its colour for every user who has FolderTint, not only for the
+/// shows its colour for every user who has FolderTintCM, not only for the
 /// one who coloured it.
 pub fn portable(icon: &Path) -> String {
     let icon = icon.display().to_string();
@@ -69,11 +69,11 @@ mod tests {
         let base = r"C:\Users\Ana\AppData\Local";
         assert_eq!(
             with_variable(
-                r"C:\Users\Ana\AppData\Local\Programs\FolderTint\icons\red.ico",
+                r"C:\Users\Ana\AppData\Local\Programs\FolderTintCM\icons\red.ico",
                 "LOCALAPPDATA",
                 base
             ),
-            r"%LOCALAPPDATA%\Programs\FolderTint\icons\red.ico"
+            r"%LOCALAPPDATA%\Programs\FolderTintCM\icons\red.ico"
         );
         assert_eq!(
             with_variable(

@@ -1,4 +1,4 @@
-# Desarrollo de FolderTint
+# Desarrollo de FolderTintCM
 
 Mismo entorno que ScreenShotCM: Rust con el objetivo
 `x86_64-pc-windows-gnullvm` y llvm-mingw (sin Visual Studio), WiX 5.0.2 para
@@ -8,7 +8,7 @@ el MSI. Ver los pasos de instalación de las herramientas en
 ```powershell
 pwsh -ExecutionPolicy Bypass ./scripts/cargo.ps1 test
 pwsh -ExecutionPolicy Bypass ./scripts/cargo.ps1 clippy --release --all-targets '--' -D warnings
-pwsh -ExecutionPolicy Bypass ./installer/build.ps1   # → dist/FolderTint-<versión>.msi
+pwsh -ExecutionPolicy Bypass ./installer/build.ps1   # → dist/FolderTintCM-<versión>.msi
 ```
 
 ## Arquitectura
@@ -34,17 +34,17 @@ iconos, los textos del menú y las entradas del instalador.
 
 `build.rs` incluye `palette.rs`, `art.rs` e `ico.rs` (Rust puro) para dibujar
 el icono de la aplicación y generar las tablas de cadenas en español e inglés
-que el menú lee con `MUIVerb=@foldertint.exe,-id`.
+que el menú lee con `MUIVerb=@foldertintcm.exe,-id`.
 
 ### Decisiones
 
 - **`%LOCALAPPDATA%` en `desktop.ini`**: la carpeta coloreada se ve igual
-  para cualquier usuario que tenga FolderTint (unidades compartidas o USB).
+  para cualquier usuario que tenga FolderTintCM (unidades compartidas o USB).
 - **Menú clásico en `HKCU\Software\Classes\Directory`** (y `\Background`),
   declarado en el MSI: se instala y desinstala sin código propio.
 - **Sin tabla de cadenas neutra (0,0)**: el cargador la prefería y ocultaba la
   española en un Windows es-ES.
-- **El instalador no borra `HKCU\Software\FolderTint` con
+- **El instalador no borra `HKCU\Software\FolderTintCM` con
   `RemoveRegistryKey`**: también se ejecutaba en la mitad de desinstalación de
   una actualización y perdía la lista de carpetas. La limpia `--uninstall`.
 
@@ -52,7 +52,7 @@ que el menú lee con `MUIVerb=@foldertint.exe,-id`.
 
 | Orden | Uso |
 |---|---|
-| `foldertint.exe` | Muestra cómo se usa |
+| `foldertintcm.exe` | Muestra cómo se usa |
 | `--apply <color o #rrggbb> <carpeta>` | Lo ejecuta el menú (paleta o color propio) |
 | `--pick <carpeta>` | «Personalizado…»: selector de color |
 | `--clear <carpeta>` | Lo ejecuta el menú |
@@ -63,14 +63,14 @@ que el menú lee con `MUIVerb=@foldertint.exe,-id`.
 ## Colores propios
 
 - El icono de un color propio se dibuja la primera vez que se usa, en
-  `%LOCALAPPDATA%\FolderTint\custom\<rrggbb>.ico` (escritura atómica: varias
+  `%LOCALAPPDATA%\FolderTintCM\custom\<rrggbb>.ico` (escritura atómica: varias
   carpetas a la vez lanzan varios procesos).
-- Los recientes se guardan en `HKCU\Software\FolderTint\Custom\Recent` y el
+- Los recientes se guardan en `HKCU\Software\FolderTintCM\Custom\Recent` y el
   programa escribe sus entradas `50`–`55` bajo las claves del menú (solo si el
   MSI instaló el menú). El MSI no las conoce: `--uninstall` las borra, y por
   eso se ejecuta antes de `RemoveRegistryValues`.
 - Con varias carpetas seleccionadas Explorer lanza un proceso por carpeta: un
-  mutex (`Local\FolderTint.Pick`) deja que el primero muestre el selector y
+  mutex (`Local\FolderTintCM.Pick`) deja que el primero muestre el selector y
   anote la respuesta (`LastPick`, con su hora); los demás, lanzados antes de
   esa respuesta, la reutilizan. Un solo diálogo, el mismo color para todas.
 - Las cadenas del recurso se escriben como `L"…"` con escapes `\xNNNN`:
@@ -91,7 +91,7 @@ instalado, sin duplicarlo en los recientes).
 
 ## Herramientas de mantenimiento
 
-- `foldertint.exe --export-brand <carpeta>` escribe el icono (`icon-44.png`,
+- `foldertintcm.exe --export-brand <carpeta>` escribe el icono (`icon-44.png`,
   `icon-150.png`, `icon-256.png`) y las 13 carpetas (`folders/<color>.png`)
   para el sitio web, del mismo dibujo que instala.
 - Una compilación de depuración acepta, para fotografiar el selector sin tocar
@@ -108,16 +108,16 @@ prueban, pasan clippy y empaquetan el MSI en GitHub Actions
 versión y hash y las acciones fijadas por commit. Dependabot vigila las
 acciones y el crate.
 
-`installer/build.ps1` deja también `dist/FolderTint.msi`, el nombre fijo que
+`installer/build.ps1` deja también `dist/FolderTintCM.msi`, el nombre fijo que
 se sube a cada versión del repositorio del sitio
-(`foldertint/foldertint.github.io`), para el enlace permanente
-`releases/latest/download/FolderTint.msi`.
+(`foldertintcm/foldertintcm.github.io`), para el enlace permanente
+`releases/latest/download/FolderTintCM.msi`.
 
 ## Pendiente
 
 - Menú de primer nivel en Windows 11 (sin *Mostrar más opciones*): requiere
   un `IExplorerCommand` en una DLL COM y un paquete con identidad (MSIX o
   paquete disperso firmado).
-- Publicación: la organización `foldertint` en GitHub con sus dos
+- Publicación: la organización `foldertintcm` en GitHub con sus dos
   repositorios, la primera versión en Releases, firma de código y
   Microsoft Store.

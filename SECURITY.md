@@ -20,9 +20,9 @@ Solo la última versión publicada · Only the latest release.
 
 ## Superficie · Surface
 
-- FolderTint no abre conexiones de red ni escucha en ningún puerto, y no deja
+- FolderTintCM no abre conexiones de red ni escucha en ningún puerto, y no deja
   ningún proceso en segundo plano.
-  FolderTint opens no network connections, listens on no port and leaves no
+  FolderTintCM opens no network connections, listens on no port and leaves no
   process running in the background.
 - La línea de órdenes solo acepta órdenes conocidas, colores de la paleta o
   `#rrggbb`, y carpetas que existen; cualquier otra cosa se rechaza.
@@ -30,9 +30,9 @@ Solo la última versión publicada · Only the latest release.
   folders that exist; anything else is refused.
 - Solo escribe el `desktop.ini` de la carpeta, a través de la función del
   sistema (`SHGetSetFolderCustomSettings`), y nunca deshace un icono que no
-  puso FolderTint.
+  puso FolderTintCM.
   It only writes the folder's `desktop.ini`, through the system function
-  (`SHGetSetFolderCustomSettings`), and never undoes an icon FolderTint did not
+  (`SHGetSetFolderCustomSettings`), and never undoes an icon FolderTintCM did not
   set.
 - Se ejecuta con los permisos del usuario, sin administrador, y solo escribe
   en `HKEY_CURRENT_USER` y `%LOCALAPPDATA%`.

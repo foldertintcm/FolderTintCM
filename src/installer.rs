@@ -4,7 +4,7 @@
 //!
 //! The menu is a classic cascading verb under `Directory` (right click on a
 //! folder) and `Directory\Background` (right click inside one), registered
-//! per user. Its labels are indirect strings (`@foldertint.exe,-id`) so
+//! per user. Its labels are indirect strings (`@foldertintcm.exe,-id`) so
 //! Explorer shows them in Windows' display language.
 
 use std::fmt::Write as _;
@@ -14,9 +14,9 @@ use std::path::Path;
 use crate::palette::{Tint, strings};
 use crate::{art, ico};
 
-const ICONS_GUID: &str = "4129EBE1-5B73-4EF5-93AB-8E2151F70FAD";
-const FOLDER_MENU_GUID: &str = "0D416BF2-05DD-4F41-B419-670DB2962D6F";
-const BACKGROUND_MENU_GUID: &str = "ED0C4798-B5B7-45F5-810F-AC2A5F0B6228";
+const ICONS_GUID: &str = "2F5B4F13-E264-4808-B589-C980ABDC0B05";
+const FOLDER_MENU_GUID: &str = "8C0DB166-F39D-444B-864E-2E094D973270";
+const BACKGROUND_MENU_GUID: &str = "B0BD6A17-7071-4D65-A375-6A9925D8A803";
 
 /// Writes `<dir>\icons\<tint>.ico` and `<dir>\ContextMenu.wxs`.
 pub fn export(dir: &Path) -> io::Result<()> {
@@ -61,13 +61,13 @@ pub const PLACES: [Place; 2] = [
     Place {
         id: "FolderMenu",
         guid: FOLDER_MENU_GUID,
-        key: r"Software\Classes\Directory\shell\FolderTint",
+        key: r"Software\Classes\Directory\shell\FolderTintCM",
         folder_arg: "%1",
     },
     Place {
         id: "BackgroundMenu",
         guid: BACKGROUND_MENU_GUID,
-        key: r"Software\Classes\Directory\Background\shell\FolderTint",
+        key: r"Software\Classes\Directory\Background\shell\FolderTintCM",
         folder_arg: "%V",
     },
 ];
@@ -76,11 +76,11 @@ pub const PLACES: [Place; 2] = [
 const ECF_SEPARATORBEFORE: u32 = 0x20;
 
 pub fn context_menu_wxs() -> String {
-    let exe = "[INSTALLFOLDER]foldertint.exe";
+    let exe = "[INSTALLFOLDER]foldertintcm.exe";
     let mut x = String::new();
     x.push_str(
         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
-         <!-- Generated from src/palette.rs by foldertint.exe (export-installer-assets). Do not edit. -->\n\
+         <!-- Generated from src/palette.rs by foldertintcm.exe (export-installer-assets). Do not edit. -->\n\
          <Wix xmlns=\"http://wixtoolset.org/schemas/v4/wxs\">\n  <Fragment>\n",
     );
 
@@ -97,7 +97,7 @@ pub fn context_menu_wxs() -> String {
         );
     }
     x.push_str(
-        "        <RegistryValue Root=\"HKCU\" Key=\"Software\\FolderTint\" Name=\"Icons\" Type=\"integer\" Value=\"1\" KeyPath=\"yes\" />\n\
+        "        <RegistryValue Root=\"HKCU\" Key=\"Software\\FolderTintCM\" Name=\"Icons\" Type=\"integer\" Value=\"1\" KeyPath=\"yes\" />\n\
          \x20       <RemoveFolder Id=\"RemoveIconsFolder\" On=\"uninstall\" />\n      </Component>\n    </ComponentGroup>\n\n",
     );
 
@@ -255,7 +255,7 @@ mod tests {
 
     #[test]
     fn export_writes_every_icon() {
-        let dir = std::env::temp_dir().join(format!("foldertint-export-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("foldertintcm-export-{}", std::process::id()));
         export(&dir).unwrap();
         for tint in Tint::ALL {
             let ico =

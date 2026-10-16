@@ -1,4 +1,4 @@
-//! FolderTint's own colour picker, in place of Windows' 1990s ChooseColor
+//! FolderTintCM's own colour picker, in place of Windows' 1990s ChooseColor
 //! dialog (which also came out garbled at 150 % scaling): a live preview of
 //! the folder, a saturation × value square, a hue bar, the palette and the
 //! recent colours as swatches, a HEX field, and Apply in the colour itself.

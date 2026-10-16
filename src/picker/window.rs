@@ -127,7 +127,7 @@ pub fn run(initial: Rgb, palette: Vec<Rgb>, recent: Vec<Rgb>, dark: bool) -> Opt
             hInstance: instance.into(),
             hIcon: LoadIconW(Some(instance.into()), PCWSTR(1 as _)).unwrap_or_default(),
             hCursor: LoadCursorW(None, IDC_ARROW).unwrap_or_default(),
-            lpszClassName: w!("FolderTint.Picker"),
+            lpszClassName: w!("FolderTintCM.Picker"),
             ..Default::default()
         };
         RegisterClassExW(&class);
@@ -153,14 +153,14 @@ pub fn run(initial: Rgb, palette: Vec<Rgb>, recent: Vec<Rgb>, dark: bool) -> Opt
 
         let style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN;
         let title = wide(tr(
-            "Color personalizado — FolderTint",
-            "Custom colour — FolderTint",
+            "Color personalizado — FolderTintCM",
+            "Custom colour — FolderTintCM",
         ))?;
         let mut cursor = POINT::default();
         let _ = GetCursorPos(&mut cursor);
         let hwnd = CreateWindowExW(
             WINDOW_EX_STYLE::default(),
-            w!("FolderTint.Picker"),
+            w!("FolderTintCM.Picker"),
             PCWSTR(title.as_ptr()),
             style,
             cursor.x,

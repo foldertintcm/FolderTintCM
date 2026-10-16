@@ -18,7 +18,7 @@ pub enum Command {
     /// `--clear <folder>`
     Clear { folder: PathBuf },
     /// `--uninstall`: the installer, before it removes the icons, gives
-    /// every folder FolderTint coloured its normal icon back.
+    /// every folder FolderTintCM coloured its normal icon back.
     Uninstall,
     /// `--export-installer-assets <dir>`: the icons and the WiX fragment
     /// the MSI is built from.

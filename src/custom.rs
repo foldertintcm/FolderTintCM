@@ -1,8 +1,8 @@
-//! Colours beyond the palette: picking or creating one in FolderTint's own
+//! Colours beyond the palette: picking or creating one in FolderTintCM's own
 //! picker, drawing its icon on first use, and keeping the last few in the
 //! context menu so they are one click away next time.
 //!
-//! Kept under `HKCU\Software\FolderTint\Custom`:
+//! Kept under `HKCU\Software\FolderTintCM\Custom`:
 //! - `Recent`: the last colours used, newest first (`3a7bd5,ff8800`).
 //! - (`Swatches`, the 16 slots of the Windows dialog 0.2.0 used, is no
 //!   longer written; `forget_all` still removes it with the key.)
@@ -23,7 +23,7 @@ use crate::installer::PLACES;
 use crate::palette::Rgb;
 use crate::{art, ico, reg};
 
-const KEY: &str = r"Software\FolderTint\Custom";
+const KEY: &str = r"Software\FolderTintCM\Custom";
 
 /// How many recent colours the menu offers.
 pub const MAX_RECENT: usize = 6;
@@ -150,7 +150,7 @@ fn now_ms() -> u128 {
 /// cancel, instead of opening a dialog each.
 pub fn pick_shared(initial: Rgb) -> Option<Rgb> {
     let started = now_ms();
-    let mutex = unsafe { CreateMutexW(None, false, w!("Local\\FolderTint.Pick")) }.ok();
+    let mutex = unsafe { CreateMutexW(None, false, w!("Local\\FolderTintCM.Pick")) }.ok();
     if let Some(m) = mutex {
         unsafe {
             WaitForSingleObject(m, INFINITE);
@@ -239,7 +239,7 @@ mod tests {
 
     #[test]
     fn icons_are_drawn_once_and_reused() {
-        let dir = std::env::temp_dir().join(format!("foldertint-custom-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("foldertintcm-custom-{}", std::process::id()));
         let rgb = Rgb([0x12, 0x34, 0x56]);
         let path = ensure_icon(&dir, rgb).unwrap();
         assert!(path.ends_with(r"custom\123456.ico"));

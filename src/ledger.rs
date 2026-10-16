@@ -1,5 +1,5 @@
-//! The folders FolderTint has coloured, kept in the registry
-//! (`HKCU\Software\FolderTint\Folders`: one value per folder, named by its
+//! The folders FolderTintCM has coloured, kept in the registry
+//! (`HKCU\Software\FolderTintCM\Folders`: one value per folder, named by its
 //! path, holding the colour) so that uninstalling can give each of them its
 //! normal icon back instead of leaving it pointing at a deleted file.
 
@@ -21,7 +21,7 @@ pub struct Ledger {
 
 impl Ledger {
     pub fn user() -> Ledger {
-        Ledger::at(r"Software\FolderTint\Folders")
+        Ledger::at(r"Software\FolderTintCM\Folders")
     }
 
     fn at(key: &str) -> Ledger {
@@ -109,7 +109,7 @@ mod tests {
 
     #[test]
     fn forgetting_all_removes_an_empty_parent_only() {
-        let parent = format!(r"Software\FolderTint-Test-{}", std::process::id());
+        let parent = format!(r"Software\FolderTintCM-Test-{}", std::process::id());
         let ledger = Ledger::at(&format!(r"{parent}\Folders"));
         ledger
             .record(Path::new(r"C:\a"), Colour::Tint(Tint::Red))
@@ -130,7 +130,7 @@ mod tests {
 
     #[test]
     fn records_lists_and_forgets() {
-        let parent = format!(r"Software\FolderTint-Test-{}-b", std::process::id());
+        let parent = format!(r"Software\FolderTintCM-Test-{}-b", std::process::id());
         let ledger = Ledger::at(&format!(r"{parent}\Folders"));
         ledger.forget_all();
         assert!(ledger.folders().is_empty());
