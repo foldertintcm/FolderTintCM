@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FolderTint, per-user: no elevation, installed under %LOCALAPPDATA%\Programs.
+  The executable, one icon per colour, and the context menu on folders
+  (HKCU\Software\Classes\Directory). The icons and the menu are declared in
+  ContextMenu.wxs, which installer/build.ps1 generates from the palette.
+  Uninstalling first gives every coloured folder its normal icon back.
+  Built by installer/build.ps1 with WiX 5.0.2 (MS-RL).
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="FolderTint"
+           Manufacturer="FolderTint"
+           Version="$(var.Version)"
+           UpgradeCode="F1001802-8098-47DF-AE37-E7789D1FE9E4"
+           Scope="perUser"
+           Compressed="yes"
+           Language="3082"
+           Codepage="65001">
+    <SummaryInformation Description="FolderTint — colores para las carpetas de Windows" />
+
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="Ya está instalada una versión más reciente de FolderTint." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <Icon Id="AppIcon" SourceFile="$(var.Payload)\foldertint.exe" />
+    <Property Id="ARPPRODUCTICON" Value="AppIcon" />
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="ARPURLINFOABOUT" Value="https://foldertint.github.io/" />
+    <Property Id="ARPHELPLINK" Value="https://github.com/foldertint/foldertint.github.io/issues" />
+    <Property Id="ARPCOMMENTS" Value="Clic derecho en una carpeta → FolderTint. Open source (GPL-3.0): https://github.com/foldertint/FolderTint" />
+
+    <!-- %LOCALAPPDATA%\Programs\FolderTint, where Windows puts per-user
+         programs (as ScreenShotCM). -->
+    <StandardDirectory Id="LocalAppDataFolder">
+      <Directory Id="ProgramsFolder" Name="Programs">
+        <Directory Id="INSTALLFOLDER" Name="FolderTint">
+          <Directory Id="ICONSFOLDER" Name="icons" />
+          <Component Id="Program" Guid="F64A9FCB-511B-43CE-8220-E582673F9848">
+            <File Id="ProgramExe" Source="$(var.Payload)\foldertint.exe" />
+            <File Id="Licence" Source="$(var.Payload)\LICENSE.txt" />
+            <RegistryValue Root="HKCU" Key="Software\FolderTint" Name="InstallDir" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+            <RemoveFolder Id="RemoveInstallFolder" On="uninstall" />
+            <RemoveFolder Id="RemoveProgramsFolder" Directory="ProgramsFolder" On="uninstall" />
+            <!-- No RemoveRegistryKey for Software\FolderTint: it also ran in
+                 the removal half of an upgrade and lost the list of coloured
+                 folders. RestoreFolders, below, deletes that list on a real
+                 uninstall. -->
+          </Component>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <Feature Id="Main" Title="FolderTint">
+      <ComponentRef Id="Program" />
+      <ComponentGroupRef Id="Tints" />
+      <ComponentGroupRef Id="ContextMenu" />
+    </Feature>
+
+    <!-- On a real uninstall (not the removal half of an upgrade), give every
+         folder FolderTint coloured its normal icon back while the program
+         is still there to do it, and remove what the program itself wrote:
+         the recent custom colours under the menu's keys (so the installer
+         can then remove those keys), their icons in
+         %LOCALAPPDATA%\FolderTint, and its list of folders. Before
+         RemoveRegistryValues, which would otherwise find the menu keys
+         still holding the program's entries and leave them. -->
+    <CustomAction Id="RestoreFolders"
+                  FileRef="ProgramExe"
+                  ExeCommand="--uninstall"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="RestoreFolders" Before="RemoveRegistryValues"
+              Condition="(REMOVE~=&quot;ALL&quot;) AND (NOT UPGRADINGPRODUCTCODE)" />
+    </InstallExecuteSequence>
+  </Package>
+</Wix>

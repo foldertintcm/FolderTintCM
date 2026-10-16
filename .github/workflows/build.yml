@@ -1,0 +1,73 @@
+# Builds the program and its MSI from source, the same way as on a workstation:
+# Rust's gnullvm target linked by llvm-mingw, and WiX 5.0.2. Each tool is
+# pinned and checked by its hash, so the binary can be traced to this source
+# (the condition for free code signing).
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  LLVM_MINGW_VERSION: "20261006"
+  LLVM_MINGW_SHA256: "317492c456aa27ee607a5919f1d2d38dcdc1112516a24d0bf4b00d078f52d17a"
+  WIX_VERSION: "5.0.2"
+  # The runner's host is MSVC, and newer rustup refuses a host tuple inside
+  # rust-toolchain.toml: name the same toolchain here, which takes precedence.
+  RUSTUP_TOOLCHAIN: stable-x86_64-pc-windows-gnullvm
+
+jobs:
+  build:
+    runs-on: windows-2025
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Rust toolchain
+        run: |
+          rustup toolchain install $env:RUSTUP_TOOLCHAIN --force-non-host --profile minimal --component clippy
+          rustc --version
+
+      - name: llvm-mingw
+        run: |
+          $name = "llvm-mingw-$env:LLVM_MINGW_VERSION-ucrt-x86_64"
+          $zip = Join-Path $env:RUNNER_TEMP "$name.zip"
+          Invoke-WebRequest "https://github.com/mstorsjo/llvm-mingw/releases/download/$env:LLVM_MINGW_VERSION/$name.zip" -OutFile $zip
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+          if ($hash -ne $env:LLVM_MINGW_SHA256) { throw "llvm-mingw hash $hash does not match" }
+          Expand-Archive $zip -DestinationPath $env:RUNNER_TEMP
+          "LLVM_MINGW=$(Join-Path $env:RUNNER_TEMP $name)" >> $env:GITHUB_ENV
+
+      - name: WiX
+        run: |
+          dotnet tool install --global wix --version $env:WIX_VERSION
+          "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
+
+      - name: Test
+        run: ./scripts/cargo.ps1 test
+
+      - name: Lint
+        # Quoted: PowerShell would otherwise take '--' for itself.
+        run: ./scripts/cargo.ps1 clippy --release --all-targets '--' -D warnings
+
+      - name: Build the program and the MSI
+        run: ./installer/build.ps1
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: FolderTint
+          path: |
+            target/release/foldertint.exe
+            dist/FolderTint-*.msi
+            dist/FolderTint-*.msi.sha256
+          if-no-files-found: error
