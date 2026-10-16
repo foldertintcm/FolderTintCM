@@ -17,8 +17,8 @@ Dos formas de instalarlo, con el mismo programa:
 - **Microsoft Store / MSIX** (`msix/`): el menú es una extensión COM
   (`shellext/`, `IExplorerCommand`) y sale en el primer menú de Windows 11.
 
-Proyecto hermano: `D:\Desarrollo\PRY.ScreenShotCM` sigue los mismos patrones;
-ante la duda, haz lo que hace él.
+Proyecto hermano: [ScreenShotCM](https://github.com/screenshotcm/ScreenShotCM)
+sigue los mismos patrones; ante la duda, haz lo que hace él.
 
 ## Comandos
 
