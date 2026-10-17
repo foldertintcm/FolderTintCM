@@ -1,6 +1,6 @@
 [package]
 name = "foldertintcm"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 description = "FolderTintCM — colour folders from Explorer's context menu"
 license = "GPL-3.0-or-later"

@@ -24,6 +24,18 @@ son los de Partner Center.
   > IExplorerCommand extension) to change the icon of the folders the user
   > chooses, through the system function SHGetSetFolderCustomSettings.
 
+- **Novedades de esta versión** (*What's new in this version*), 0.3.1:
+
+  > El color se ve a la primera, también en las vistas de iconos medianos,
+  > grandes y extra grandes: ya no hace falta elegirlo dos veces. Las
+  > unidades (como D:\) ya no ofrecen colores, porque Windows no los muestra
+  > en ellas; «Quitar color» sigue disponible.
+
+  > The colour now shows the first time, also in the medium, large and extra
+  > large icon views: no need to pick it twice. Drives (such as D:\) no
+  > longer offer colours, since Windows does not show them there; "Remove
+  > colour" is still available.
+
 ---
 
 ## Español (es-ES)
@@ -89,7 +101,9 @@ son los de Partner Center.
 carpetas, color de carpeta, iconos de carpeta, personalizar carpetas,
 organizar, explorador, menú contextual
 
-**Copyright**: © 2026 CarlosM.
+**Copyright**: © 2026 CMSoftware
+
+**Desarrollado por** (*Developed by*): CMSoftware
 
 ---
 
@@ -155,4 +169,6 @@ organizar, explorador, menú contextual
 folders, folder color, folder icons, customize folders, organize, file
 explorer, context menu
 
-**Copyright**: © 2026 CarlosM.
+**Copyright**: © 2026 CMSoftware
+
+**Developed by**: CMSoftware

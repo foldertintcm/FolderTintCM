@@ -19,7 +19,7 @@
 param(
     [string]$IdentityName = 'CarlosM.FolderTintCM',
     [string]$Publisher = 'CN=D34B73EC-B420-4B4F-9127-4A1F90BF5793',
-    [string]$PublisherDisplayName = 'CarlosM.',
+    [string]$PublisherDisplayName = 'CMSoftware',
     # The publisher id in the package family name (Partner Center, PFN).
     [string]$PublisherId = '8ja15k5gbymem',
     [switch]$Layout

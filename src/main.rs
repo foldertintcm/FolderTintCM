@@ -119,12 +119,14 @@ fn apply(colour: Colour, folder: &Path) -> Result<(), String> {
     if let (Colour::Custom(rgb), Ok(exe)) = (colour, std::env::current_exe()) {
         custom::remember(rgb, &exe, &data);
     }
+    folder::renotify(folder);
     Ok(())
 }
 
 /// The colour dialog, opened on the folder's current colour (or the last
 /// one created), then that colour applied. Cancel changes nothing.
 fn pick(folder: &Path) -> Result<(), String> {
+    folder::colourable(folder).map_err(describe)?;
     let current = folder::icon(folder)
         .map_err(describe)?
         .and_then(|icon| folder::colour_of(&icon))
@@ -140,7 +142,9 @@ fn pick(folder: &Path) -> Result<(), String> {
 }
 
 fn clear(folder: &Path) -> Result<(), String> {
-    folder::clear(folder).map_err(describe)?;
+    if folder::clear(folder).map_err(describe)? == folder::Cleared::Restored {
+        folder::renotify(folder);
+    }
     Ledger::user().forget(folder);
     Ok(())
 }
@@ -168,6 +172,14 @@ fn describe(e: folder::Error) -> String {
             tr(
                 "No es una carpeta o ya no existe:",
                 "Not a folder, or it no longer exists:"
+            ),
+            p.display()
+        ),
+        folder::Error::DriveRoot(p) => format!(
+            "{}\n{}",
+            tr(
+                "Las unidades no se pueden colorear, solo las carpetas que contienen:",
+                "Drives cannot be coloured, only the folders in them:"
             ),
             p.display()
         ),

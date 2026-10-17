@@ -80,6 +80,13 @@ pub fn entries(spanish: bool, package: &Path, data: Option<&Path>, recent: &[Rgb
     out
 }
 
+/// Whether a colour would show on `folder`: not on a drive's root (`D:\`),
+/// which Explorer draws with the drive's icon. "Remove colour" is still
+/// offered there, to undo one set before this check existed.
+pub fn colourable(folder: &str) -> bool {
+    Path::new(folder).parent().is_some()
+}
+
 /// `recent.txt`: hex codes separated by commas, newest first.
 pub fn parse_recent(text: &str) -> Vec<Rgb> {
     let mut out: Vec<Rgb> = Vec::new();
@@ -161,6 +168,14 @@ mod tests {
             (Action::Clear, true)
         );
         assert_eq!(entries(false, &pkg, None, &[])[13].title, "Custom…");
+    }
+
+    #[test]
+    fn drive_roots_take_no_colour() {
+        assert!(!colourable(r"D:\"));
+        assert!(!colourable(r"\\server\share\"));
+        assert!(colourable(r"D:\Fotos"));
+        assert!(colourable(r"\\server\share\Fotos"));
     }
 
     #[test]

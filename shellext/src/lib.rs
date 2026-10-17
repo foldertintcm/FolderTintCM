@@ -38,7 +38,7 @@ use windows::Win32::System::Threading::{
     CreateProcessW, PROCESS_CREATION_FLAGS, PROCESS_INFORMATION, STARTUPINFOW,
 };
 use windows::Win32::UI::Shell::{
-    ECF_HASSUBCOMMANDS, ECF_SEPARATORBEFORE, ECS_ENABLED, IEnumExplorerCommand,
+    ECF_HASSUBCOMMANDS, ECF_SEPARATORBEFORE, ECS_ENABLED, ECS_HIDDEN, IEnumExplorerCommand,
     IEnumExplorerCommand_Impl, IExplorerCommand, IExplorerCommand_Impl, IShellItemArray, SHStrDupW,
     SIGDN_FILESYSPATH,
 };
@@ -223,8 +223,16 @@ impl IExplorerCommand_Impl for Sub_Impl {
         Err(E_NOTIMPL.into())
     }
 
-    fn GetState(&self, _: Ref<IShellItemArray>, _: BOOL) -> Result<u32> {
-        Ok(ECS_ENABLED.0 as u32)
+    fn GetState(&self, items: Ref<IShellItemArray>, _: BOOL) -> Result<u32> {
+        // On a drive's root (`D:\`, or the background of an open drive) a
+        // colour would not show: only "Remove colour" stays.
+        let roots_only = self.entry.action != menu::Action::Clear
+            && items
+                .ok()
+                .ok()
+                .and_then(|items| folders(items).ok())
+                .is_some_and(|f| !f.is_empty() && !f.iter().any(|f| menu::colourable(f)));
+        Ok(if roots_only { ECS_HIDDEN } else { ECS_ENABLED }.0 as u32)
     }
 
     fn Invoke(&self, items: Ref<IShellItemArray>, _: Ref<IBindCtx>) -> Result<()> {

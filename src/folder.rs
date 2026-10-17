@@ -9,13 +9,14 @@ use std::fmt;
 use std::io;
 use std::os::windows::fs::MetadataExt;
 use std::path::{Path, PathBuf};
+use std::time::Duration;
 
 use windows::Win32::Storage::FileSystem::{
     FILE_ATTRIBUTE_NORMAL, FILE_ATTRIBUTE_READONLY, FILE_FLAGS_AND_ATTRIBUTES, SetFileAttributesW,
 };
 use windows::Win32::UI::Shell::{
-    FCS_FORCEWRITE, FCS_READ, FCSM_ICONFILE, SHCNE_UPDATEDIR, SHCNE_UPDATEITEM, SHCNF_PATHW,
-    SHChangeNotify, SHFOLDERCUSTOMSETTINGS, SHGetSetFolderCustomSettings,
+    FCS_FORCEWRITE, FCS_READ, FCSM_ICONFILE, SHCNE_UPDATEDIR, SHCNE_UPDATEITEM, SHCNF_FLUSH,
+    SHCNF_PATHW, SHChangeNotify, SHFOLDERCUSTOMSETTINGS, SHGetSetFolderCustomSettings,
 };
 use windows::core::{PCWSTR, PWSTR};
 
@@ -25,6 +26,9 @@ use crate::wide::{from_buffer, wide};
 #[derive(Debug)]
 pub enum Error {
     NotAFolder(PathBuf),
+    /// `D:\`, `\\server\share\`: Explorer draws a drive with its own icon
+    /// and never reads a `desktop.ini` there, so a colour would not show.
+    DriveRoot(PathBuf),
     Windows(windows::core::Error),
     Io(io::Error),
 }
@@ -32,7 +36,7 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::NotAFolder(p) => write!(f, "{}", p.display()),
+            Error::NotAFolder(p) | Error::DriveRoot(p) => write!(f, "{}", p.display()),
             Error::Windows(e) => write!(f, "{}", e.message()),
             Error::Io(e) => write!(f, "{e}"),
         }
@@ -61,9 +65,20 @@ fn checked(folder: &Path) -> Result<Vec<u16>, Error> {
     }
 }
 
+/// A folder that can take a colour: an existing directory that is not the
+/// root of a drive. Checked before the picker opens, so nobody chooses a
+/// colour that cannot show.
+pub fn colourable(folder: &Path) -> Result<(), Error> {
+    if folder.parent().is_none() {
+        return Err(Error::DriveRoot(folder.to_path_buf()));
+    }
+    checked(folder).map(drop)
+}
+
 /// Sets the folder's icon to `icon` (a path, environment variables
 /// allowed, as `desktop.ini` takes them).
 pub fn set_icon(folder: &Path, icon: &str) -> Result<(), Error> {
+    colourable(folder)?;
     let path = checked(folder)?;
     let mut icon = wide(icon).ok_or_else(|| Error::NotAFolder(folder.to_path_buf()))?;
     let mut fcs = SHFOLDERCUSTOMSETTINGS {
@@ -233,6 +248,35 @@ fn notify(path: &[u16]) {
             Some(path.as_ptr().cast()),
             None,
         );
+    }
+}
+
+/// Tells Explorer again, once it has caught up with the change on disk.
+///
+/// Explorer also watches the disk, and handles writing `desktop.ini` and
+/// marking the folder on its own schedule. In the views that draw folders
+/// from the thumbnail cache (medium icons and larger), a redraw asked for
+/// before that is lost: the folder keeps its old icon until something
+/// else refreshes it, so the first click seemed to do nothing. Measured on
+/// Windows 11: asked again after 200 ms, most folders still kept the old
+/// icon; after 600 ms, every one changed. So the program asks again at
+/// 0.7 s, and once more at 2 s for a slower or busier machine. It has no
+/// window by then, and the folder already has its colour on disk.
+pub fn renotify(folder: &Path) {
+    const AFTER: [Duration; 2] = [Duration::from_millis(700), Duration::from_millis(1300)];
+    let Some(path) = wide(folder) else {
+        return;
+    };
+    for wait in AFTER {
+        std::thread::sleep(wait);
+        unsafe {
+            SHChangeNotify(
+                SHCNE_UPDATEITEM,
+                SHCNF_PATHW | SHCNF_FLUSH,
+                Some(path.as_ptr().cast()),
+                None,
+            );
+        }
     }
 }
 
@@ -407,6 +451,18 @@ mod tests {
             Err(Error::NotAFolder(_))
         ));
         assert!(matches!(clear(&file), Err(Error::NotAFolder(_))));
+    }
+
+    #[test]
+    fn drive_roots_are_refused() {
+        for root in [r"C:\", r"\\server\share\"] {
+            assert!(matches!(
+                set_icon(Path::new(root), "x.ico"),
+                Err(Error::DriveRoot(_))
+            ));
+        }
+        let dir = scratch("root");
+        assert!(colourable(&dir).is_ok());
     }
 
     fn icon_of(dir: &Path) -> Option<String> {
