@@ -27,4 +27,4 @@ features = [
 
 # The #[implement] macro for the COM classes; already part of windows.
 [dependencies.windows-core]
-version = "0.62.2"
+version = "0.100.0"
